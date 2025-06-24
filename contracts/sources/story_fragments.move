@@ -2,8 +2,10 @@ module npc_ecosystem::story_fragments {
     use std::signer;
     use std::string::{Self, String};
     use std::vector;
+    use std::option;
     use aptos_framework::timestamp;
     use aptos_framework::event;
+    use aptos_framework::object;
     use aptos_token_objects::collection;
     use aptos_token_objects::token;
 
