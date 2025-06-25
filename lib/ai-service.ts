@@ -114,7 +114,7 @@ Only include questGenerated if a quest should be created. Only include storyFrag
     const response = await axios.post(
       'https://api.together.xyz/v1/chat/completions',
       {
-        model: 'meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo',
+        model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free',
         messages: [
           {
             role: 'system',
@@ -143,7 +143,7 @@ Only include questGenerated if a quest should be created. Only include storyFrag
     const response = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.3-70b-versatile',
+        model: 'meta-llama/llama-4-maverick-17b-128e-instruct',
         messages: [
           {
             role: 'system',
