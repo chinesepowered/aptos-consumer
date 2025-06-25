@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Account } from '@aptos-labs/ts-sdk';
+import { Account, Ed25519PrivateKey } from '@aptos-labs/ts-sdk';
 import { aptosService } from '@/lib/aptos-service';
 
 interface WalletContextType {
@@ -32,7 +32,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       
       // Store account in localStorage for demo persistence
       localStorage.setItem('demo-account', JSON.stringify({
-        privateKey: newAccount.privateKey.toString(),
+        privateKeyHex: newAccount.privateKey.toString(),
         address: newAccount.accountAddress.toString()
       }));
       
@@ -67,7 +67,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const storedAccount = localStorage.getItem('demo-account');
     if (storedAccount) {
       try {
-        const { privateKey, address } = JSON.parse(storedAccount);
+        const { privateKeyHex, address } = JSON.parse(storedAccount);
+        const privateKey = new Ed25519PrivateKey(privateKeyHex);
         const restoredAccount = Account.fromPrivateKey({ privateKey });
         setAccount(restoredAccount);
         setConnected(true);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useWallet } from './wallet-provider';
-import { aiService, NPCCharacter } from '@/lib/ai-service';
+import { NPCCharacter } from '@/lib/ai-service';
 import { aptosService } from '@/lib/aptos-service';
 
 interface Message {
@@ -32,7 +32,22 @@ export function GameWorld() {
 
   const loadWorld = async () => {
     try {
-      const world = await aiService.generateProceduralWorld('mystical fantasy realm', playerLevel);
+      const apiResponse = await fetch('/api/ai/generate-world', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          theme: 'mystical fantasy realm',
+          playerLevel
+        }),
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error(`World generation failed: ${apiResponse.status}`);
+      }
+
+      const world = await apiResponse.json();
       setCurrentWorld(world);
       
       // Add welcome message
@@ -99,12 +114,24 @@ export function GameWorld() {
     setIsLoading(true);
 
     try {
-      const response = await aiService.generateNPCResponse(
-        selectedNPC,
-        playerMessage,
-        playerLevel,
-        { currentWorld }
-      );
+      const apiResponse = await fetch('/api/ai/npc-response', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          character: selectedNPC,
+          playerMessage,
+          playerLevel,
+          gameContext: { currentWorld }
+        }),
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error(`API call failed: ${apiResponse.status}`);
+      }
+
+      const response = await apiResponse.json();
 
       // Add NPC response
       setMessages(prev => [...prev, {
@@ -167,10 +194,21 @@ export function GameWorld() {
 
     } catch (error) {
       console.error('Failed to get NPC response:', error);
+      
+      let errorMessage = 'The NPC seems distracted and doesn\'t respond...';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('API call failed: 500')) {
+          errorMessage = '🤖 AI service temporarily unavailable. Please check your API keys are configured.';
+        } else if (error.message.includes('Failed to fetch')) {
+          errorMessage = '🌐 Network error. Please check your connection.';
+        }
+      }
+      
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         type: 'system',
-        content: 'The NPC seems distracted and doesn\'t respond...',
+        content: errorMessage,
         timestamp: new Date()
       }]);
     }

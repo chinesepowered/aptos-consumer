@@ -86,6 +86,24 @@ module npc_ecosystem::npc_ecosystem {
         move_to(account, registry);
     }
 
+    // Public function to initialize game registry manually if needed
+    public entry fun initialize_game_registry(account: &signer) {
+        // Only allow the module owner to initialize
+        assert!(signer::address_of(account) == @npc_ecosystem, 99);
+        
+        // Check if already initialized
+        if (!exists<GameRegistry>(@npc_ecosystem)) {
+            let registry = GameRegistry {
+                next_fragment_id: 1,
+                next_quest_id: 1,
+                total_fragments: 0,
+                total_quests: 0,
+                total_rewards_distributed: 0,
+            };
+            move_to(account, registry);
+        };
+    }
+
     // Initialize player profile
     public entry fun initialize_player_profile(account: &signer) {
         let profile = PlayerProfile {

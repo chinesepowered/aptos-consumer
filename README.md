@@ -1,23 +1,23 @@
 # Intelligent NPC Ecosystem
 
-An AI-powered GameFi platform built on Aptos blockchain where NPCs create dynamic storylines, generate quests in real-time, and evolve based on player interactions. Players can mint unique story fragments as NFTs and experience procedural game worlds.
+An AI-powered GameFi platform built on Aptos blockchain where NPCs create dynamic storylines, generate quests in real-time, and evolve based on player interactions. Players can mint unique story fragments as NFTs and experience procedural game worlds powered by advanced language models.
 
 ## 🌟 Features
 
-- **AI-Powered NPCs**: NPCs powered by Together AI and Groq create dynamic dialogue and evolving personalities
-- **Story Fragment NFTs**: Mint unique story moments as NFTs during memorable NPC interactions
-- **Dynamic Quest Generation**: AI generates quests and rewards in real-time based on gameplay
-- **Procedural World Generation**: AI creates immersive game worlds with unique NPCs and storylines
-- **Player Progression**: Level up, gain experience, and track achievements on-chain
-- **Demo-Friendly**: Automatic wallet creation with testnet APT for immediate gameplay
+- **AI-Powered NPCs**: NPCs powered by Together AI and Groq (Llama 3.3 70B & Llama 4 Maverick) create dynamic dialogue and evolving personalities
+- **Story Fragment NFTs**: Mint unique story moments as NFTs during memorable NPC interactions using Aptos token objects
+- **Dynamic Quest Generation**: AI generates quests and rewards in real-time based on gameplay context and player level
+- **Procedural World Generation**: AI creates immersive game worlds with unique NPCs and storylines for each session
+- **Player Progression**: Level up, gain experience, and track achievements on-chain with persistent profiles
+- **Demo-Friendly**: Programmatic wallet creation with localStorage persistence for seamless testing experience
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Node.js 18+ and pnpm
-- Together AI API key (get from [together.ai](https://together.ai))
-- Groq API key (get from [groq.com](https://groq.com))
+- Together AI API key (get from [together.ai](https://together.ai)) for Llama 3.3 70B
+- Groq API key (get from [groq.com](https://groq.com)) for Llama 4 Maverick
 
 ### Setup
 
@@ -38,6 +38,8 @@ An AI-powered GameFi platform built on Aptos blockchain where NPCs create dynami
    AI_PROVIDER=together  # or 'groq'
    TOGETHER_API_KEY=your_together_api_key_here
    GROQ_API_KEY=your_groq_api_key_here
+   NEXT_PUBLIC_MODULE_ADDRESS=0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c
+   NEXT_PUBLIC_APTOS_NETWORK=testnet
    ```
 
 3. **Deploy Smart Contracts (Optional):**

@@ -25,10 +25,18 @@ export function PlayerStats() {
       const playerProfile = await aptosService.getPlayerProfile(account.accountAddress.toString());
       setProfile(playerProfile);
       
-      const quests = await aptosService.getActiveQuests();
-      setActiveQuests(quests);
+      // Only load quests if we have a profile, otherwise set empty array
+      if (playerProfile) {
+        const quests = await aptosService.getActiveQuests();
+        setActiveQuests(quests);
+      } else {
+        setActiveQuests([]);
+      }
     } catch (error) {
       console.error('Failed to load player data:', error);
+      // On any error, set profile to null to show the initialize screen
+      setProfile(null);
+      setActiveQuests([]);
     } finally {
       setLoading(false);
     }
@@ -268,6 +276,22 @@ export function PlayerStats() {
             >
               <div className="font-medium">Refresh Balance</div>
               <div className="text-sm text-gray-400">Update your APT balance</div>
+            </button>
+            <button
+              onClick={async () => {
+                if (account) {
+                  try {
+                    await aptosService.initializeContract(account);
+                    setTimeout(loadPlayerData, 2000); // Reload after initialization
+                  } catch (error) {
+                    console.error('Failed to initialize contract:', error);
+                  }
+                }
+              }}
+              className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 p-3 rounded-lg transition-colors text-left"
+            >
+              <div className="font-medium">Initialize Contract</div>
+              <div className="text-sm text-gray-400">One-time setup for game registry</div>
             </button>
             <a
               href={`${aptosService.getNetworkInfo().explorerUrl}/account/${account.accountAddress.toString()}`}

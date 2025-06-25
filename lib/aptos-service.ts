@@ -57,8 +57,8 @@ class AptosService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: account.accountAddress,
       data: {
-        function: `${this.moduleAddress}::story_fragments::mint_story_fragment`,
-        functionArguments: [title, content, npcCharacter, questContext, rarity],
+        function: `${this.moduleAddress}::npc_ecosystem::mint_story_fragment`,
+        functionArguments: [title, content, npcCharacter, rarity], // questContext removed per contract
       },
     });
 
@@ -74,12 +74,12 @@ class AptosService {
     try {
       const response = await this.aptos.view({
         payload: {
-          function: `${this.moduleAddress}::story_fragments::get_fragment_details`,
+          function: `${this.moduleAddress}::npc_ecosystem::get_fragment_details`,
           functionArguments: [fragmentAddress],
         },
       });
 
-      const [id, title, content, author, npcCharacter, questContext, rarity, timestamp, interactionCount] = response as any[];
+      const [id, title, content, author, npcCharacter, rarity, timestamp, interactionCount] = response as any[];
       
       return {
         id: parseInt(id),
@@ -87,7 +87,7 @@ class AptosService {
         content,
         author,
         npcCharacter,
-        questContext,
+        questContext: '', // Not stored in current contract
         rarity: parseInt(rarity),
         timestamp: parseInt(timestamp),
         interactionCount: parseInt(interactionCount),
@@ -100,14 +100,11 @@ class AptosService {
 
   async getAllStoryFragments(): Promise<string[]> {
     try {
-      const response = await this.aptos.view({
-        payload: {
-          function: `${this.moduleAddress}::story_fragments::get_all_fragments`,
-          functionArguments: [],
-        },
-      });
-
-      return response as string[];
+      // Since our contract doesn't have a function to get all fragment addresses,
+      // we'll return an empty array for now. In a real implementation, you'd 
+      // either add this to the contract or use events to track fragments.
+      console.log('Note: getAllStoryFragments not implemented in deployed contract');
+      return [];
     } catch (error) {
       console.error('Error fetching all story fragments:', error);
       return [];
@@ -122,7 +119,7 @@ class AptosService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: account.accountAddress,
       data: {
-        function: `${this.moduleAddress}::story_fragments::interact_with_fragment`,
+        function: `${this.moduleAddress}::npc_ecosystem::interact_with_fragment`,
         functionArguments: [fragmentAddress, interactionType],
       },
     });
@@ -140,7 +137,7 @@ class AptosService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: account.accountAddress,
       data: {
-        function: `${this.moduleAddress}::npc_rewards::initialize_player_profile`,
+        function: `${this.moduleAddress}::npc_ecosystem::initialize_player_profile`,
         functionArguments: [],
       },
     });
@@ -155,9 +152,25 @@ class AptosService {
 
   async getPlayerProfile(playerAddress: string): Promise<PlayerProfile | null> {
     try {
+      // First check if the account exists at all to avoid MISSING_DATA errors
+      try {
+        await this.aptos.getAccountResource({
+          accountAddress: playerAddress,
+          resourceType: `${this.moduleAddress}::npc_ecosystem::PlayerProfile`
+        });
+      } catch (resourceError: any) {
+        // If the resource doesn't exist, return null without trying to call the view function
+        if (resourceError?.message?.includes('MISSING_DATA') || 
+            resourceError?.message?.includes('Resource not found')) {
+          console.log('Player profile resource not found - user needs to initialize profile first');
+          return null;
+        }
+        // If it's a different error, continue with the view call
+      }
+
       const response = await this.aptos.view({
         payload: {
-          function: `${this.moduleAddress}::npc_rewards::get_player_profile`,
+          function: `${this.moduleAddress}::npc_ecosystem::get_player_profile`,
           functionArguments: [playerAddress],
         },
       });
@@ -172,7 +185,18 @@ class AptosService {
         npcInteractions: parseInt(npcInteractions),
         lastInteraction: parseInt(lastInteraction),
       };
-    } catch (error) {
+    } catch (error: any) {
+      // Handle both direct error messages and nested error structures
+      const errorMessage = error?.message || error?.toString() || '';
+      const isPlayerNotFound = errorMessage.includes('MISSING_DATA') || 
+                              errorMessage.includes('Failed to borrow global resource') ||
+                              errorMessage.includes('Resource not found');
+      
+      if (isPlayerNotFound) {
+        console.log('Player profile not found - user needs to initialize profile first');
+        return null;
+      }
+      
       console.error('Error fetching player profile:', error);
       return null;
     }
@@ -191,7 +215,7 @@ class AptosService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: account.accountAddress,
       data: {
-        function: `${this.moduleAddress}::npc_rewards::create_quest`,
+        function: `${this.moduleAddress}::npc_ecosystem::create_quest`,
         functionArguments: [title, description, npcCharacter, rewardAmount, experienceReward, requiredLevel],
       },
     });
@@ -212,7 +236,7 @@ class AptosService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: account.accountAddress,
       data: {
-        function: `${this.moduleAddress}::npc_rewards::complete_quest`,
+        function: `${this.moduleAddress}::npc_ecosystem::complete_quest`,
         functionArguments: [questId, questOwner],
       },
     });
@@ -229,13 +253,13 @@ class AptosService {
     try {
       const response = await this.aptos.view({
         payload: {
-          function: `${this.moduleAddress}::npc_rewards::get_active_quests`,
+          function: `${this.moduleAddress}::npc_ecosystem::get_total_quests`,
           functionArguments: [],
         },
       });
 
       return (response as any[]).map(q => parseInt(q));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching active quests:', error);
       return [];
     }
@@ -262,6 +286,24 @@ class AptosService {
         amount,
       });
     }
+  }
+
+  // Initialize the contract (call this once after deployment)
+  async initializeContract(account: Account): Promise<string> {
+    const transaction = await this.aptos.transaction.build.simple({
+      sender: account.accountAddress,
+      data: {
+        function: `${this.moduleAddress}::npc_ecosystem::initialize_game_registry`,
+        functionArguments: [],
+      },
+    });
+
+    const committedTxn = await this.aptos.signAndSubmitTransaction({
+      signer: account,
+      transaction,
+    });
+
+    return committedTxn.hash;
   }
 
   // Demo Helper: Create a demo account without funding (SDK no longer supports auto-funding)
