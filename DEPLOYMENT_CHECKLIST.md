@@ -76,7 +76,7 @@ For full functionality, deploy contracts:
 ```bash
 cd contracts
 aptos init --network testnet
-aptos move publish --named-addresses npc_ecosystem=<address>
+aptos move publish --named-addresses npc_ecosystem=0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c
 ```
 Then update `NEXT_PUBLIC_MODULE_ADDRESS` in Vercel.
 

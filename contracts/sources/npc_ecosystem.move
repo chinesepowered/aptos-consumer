@@ -1,19 +1,23 @@
-module npc_ecosystem::npc_rewards {
+module npc_ecosystem::npc_ecosystem {
     use std::signer;
     use std::string::{Self, String};
     use std::vector;
-    use aptos_framework::coin;
     use aptos_framework::timestamp;
     use aptos_framework::event;
-    use aptos_framework::aptos_coin::AptosCoin;
 
-    // Error codes
-    const E_NOT_AUTHORIZED: u64 = 1;
-    const E_INSUFFICIENT_BALANCE: u64 = 2;
-    const E_QUEST_NOT_FOUND: u64 = 3;
-    const E_QUEST_ALREADY_COMPLETED: u64 = 4;
+    // Story Fragment NFT structure
+    struct StoryFragment has key {
+        id: u64,
+        title: String,
+        content: String,
+        author: address,
+        npc_character: String,
+        rarity: u8,
+        timestamp: u64,
+        interaction_count: u64,
+    }
 
-    // Player progression structure
+    // Player profile
     struct PlayerProfile has key {
         level: u64,
         experience: u64,
@@ -24,7 +28,7 @@ module npc_ecosystem::npc_rewards {
     }
 
     // Quest structure
-    struct Quest has key, store {
+    struct Quest has key {
         id: u64,
         title: String,
         description: String,
@@ -36,14 +40,25 @@ module npc_ecosystem::npc_rewards {
         completion_count: u64,
     }
 
-    // Global quest registry
-    struct QuestRegistry has key {
+    // Global registry
+    struct GameRegistry has key {
+        next_fragment_id: u64,
         next_quest_id: u64,
-        active_quests: vector<u64>,
+        total_fragments: u64,
+        total_quests: u64,
         total_rewards_distributed: u64,
     }
 
     // Events
+    #[event]
+    struct StoryFragmentMinted has drop, store {
+        fragment_id: u64,
+        author: address,
+        title: String,
+        npc_character: String,
+        rarity: u8,
+    }
+
     #[event]
     struct QuestCompleted has drop, store {
         quest_id: u64,
@@ -59,19 +74,13 @@ module npc_ecosystem::npc_rewards {
         total_experience: u64,
     }
 
-    #[event]
-    struct QuestCreated has drop, store {
-        quest_id: u64,
-        title: String,
-        npc_character: String,
-        reward_amount: u64,
-    }
-
     // Initialize the module
     fun init_module(account: &signer) {
-        let registry = QuestRegistry {
+        let registry = GameRegistry {
+            next_fragment_id: 1,
             next_quest_id: 1,
-            active_quests: vector::empty(),
+            total_fragments: 0,
+            total_quests: 0,
             total_rewards_distributed: 0,
         };
         move_to(account, registry);
@@ -90,7 +99,45 @@ module npc_ecosystem::npc_rewards {
         move_to(account, profile);
     }
 
-    // Create a new quest (called by NPCs/admin)
+    // Mint a story fragment
+    public entry fun mint_story_fragment(
+        account: &signer,
+        title: String,
+        content: String,
+        npc_character: String,
+        rarity: u8,
+    ) acquires GameRegistry {
+        let account_addr = signer::address_of(account);
+        let registry = borrow_global_mut<GameRegistry>(@npc_ecosystem);
+        
+        let fragment_id = registry.next_fragment_id;
+        registry.next_fragment_id = registry.next_fragment_id + 1;
+        registry.total_fragments = registry.total_fragments + 1;
+
+        let fragment = StoryFragment {
+            id: fragment_id,
+            title,
+            content,
+            author: account_addr,
+            npc_character,
+            rarity,
+            timestamp: timestamp::now_seconds(),
+            interaction_count: 0,
+        };
+
+        move_to(account, fragment);
+
+        // Emit event
+        event::emit(StoryFragmentMinted {
+            fragment_id,
+            author: account_addr,
+            title,
+            npc_character,
+            rarity,
+        });
+    }
+
+    // Create a quest
     public entry fun create_quest(
         account: &signer,
         title: String,
@@ -99,10 +146,11 @@ module npc_ecosystem::npc_rewards {
         reward_amount: u64,
         experience_reward: u64,
         required_level: u64,
-    ) acquires QuestRegistry {
-        let registry = borrow_global_mut<QuestRegistry>(@npc_ecosystem);
+    ) acquires GameRegistry {
+        let registry = borrow_global_mut<GameRegistry>(@npc_ecosystem);
         let quest_id = registry.next_quest_id;
         registry.next_quest_id = registry.next_quest_id + 1;
+        registry.total_quests = registry.total_quests + 1;
 
         let quest = Quest {
             id: quest_id,
@@ -116,40 +164,32 @@ module npc_ecosystem::npc_rewards {
             completion_count: 0,
         };
 
-        vector::push_back(&mut registry.active_quests, quest_id);
         move_to(account, quest);
-
-        event::emit(QuestCreated {
-            quest_id,
-            title,
-            npc_character,
-            reward_amount,
-        });
     }
 
-    // Complete a quest and claim rewards
+    // Complete a quest
     public entry fun complete_quest(
         account: &signer,
         quest_id: u64,
         quest_owner: address,
-    ) acquires PlayerProfile, Quest, QuestRegistry {
+    ) acquires PlayerProfile, Quest, GameRegistry {
         let player_addr = signer::address_of(account);
         
-        // Check if player profile exists, create if not
+        // Initialize profile if it doesn't exist
         if (!exists<PlayerProfile>(player_addr)) {
             initialize_player_profile(account);
         };
 
         let profile = borrow_global_mut<PlayerProfile>(player_addr);
         let quest = borrow_global_mut<Quest>(quest_owner);
-        let registry = borrow_global_mut<QuestRegistry>(@npc_ecosystem);
+        let registry = borrow_global_mut<GameRegistry>(@npc_ecosystem);
 
-        // Verify quest requirements
-        assert!(quest.is_active, E_QUEST_NOT_FOUND);
-        assert!(profile.level >= quest.required_level, E_NOT_AUTHORIZED);
-        assert!(!vector::contains(&profile.completed_quests, &quest_id), E_QUEST_ALREADY_COMPLETED);
+        // Check requirements
+        assert!(quest.is_active, 1);
+        assert!(profile.level >= quest.required_level, 2);
+        assert!(!vector::contains(&profile.completed_quests, &quest_id), 3);
 
-        // Award experience and check for level up
+        // Award experience
         profile.experience = profile.experience + quest.experience_reward;
         let new_level = calculate_level_from_experience(profile.experience);
         let leveled_up = new_level > profile.level;
@@ -159,11 +199,6 @@ module npc_ecosystem::npc_rewards {
         vector::push_back(&mut profile.completed_quests, quest_id);
         quest.completion_count = quest.completion_count + 1;
         registry.total_rewards_distributed = registry.total_rewards_distributed + quest.reward_amount;
-
-        // Transfer APT reward
-        if (quest.reward_amount > 0) {
-            coin::transfer<AptosCoin>(account, player_addr, quest.reward_amount);
-        };
 
         // Update interaction stats
         profile.npc_interactions = profile.npc_interactions + 1;
@@ -186,18 +221,13 @@ module npc_ecosystem::npc_rewards {
         };
     }
 
-    // Update story fragment count (called when player mints/receives fragments)
-    public entry fun update_story_fragments(
-        account: &signer,
-        count: u64,
-    ) acquires PlayerProfile {
-        let player_addr = signer::address_of(account);
-        if (!exists<PlayerProfile>(player_addr)) {
-            initialize_player_profile(account);
-        };
-        
-        let profile = borrow_global_mut<PlayerProfile>(player_addr);
-        profile.story_fragments_owned = count;
+    // Interact with a story fragment
+    public entry fun interact_with_fragment(
+        _account: &signer,
+        fragment_owner: address,
+    ) acquires StoryFragment {
+        let fragment = borrow_global_mut<StoryFragment>(fragment_owner);
+        fragment.interaction_count = fragment.interaction_count + 1;
     }
 
     // Helper function to calculate level from experience
@@ -229,30 +259,29 @@ module npc_ecosystem::npc_rewards {
     }
 
     #[view]
-    public fun get_quest_details(quest_owner: address): (u64, String, String, String, u64, u64, u64, bool, u64) acquires Quest {
-        let quest = borrow_global<Quest>(quest_owner);
+    public fun get_fragment_details(fragment_owner: address): (u64, String, String, address, String, u8, u64, u64) acquires StoryFragment {
+        let fragment = borrow_global<StoryFragment>(fragment_owner);
         (
-            quest.id,
-            quest.title,
-            quest.description,
-            quest.npc_character,
-            quest.reward_amount,
-            quest.experience_reward,
-            quest.required_level,
-            quest.is_active,
-            quest.completion_count
+            fragment.id,
+            fragment.title,
+            fragment.content,
+            fragment.author,
+            fragment.npc_character,
+            fragment.rarity,
+            fragment.timestamp,
+            fragment.interaction_count
         )
     }
 
     #[view]
-    public fun get_active_quests(): vector<u64> acquires QuestRegistry {
-        let registry = borrow_global<QuestRegistry>(@npc_ecosystem);
-        registry.active_quests
+    public fun get_total_fragments(): u64 acquires GameRegistry {
+        let registry = borrow_global<GameRegistry>(@npc_ecosystem);
+        registry.total_fragments
     }
 
     #[view]
-    public fun get_total_rewards_distributed(): u64 acquires QuestRegistry {
-        let registry = borrow_global<QuestRegistry>(@npc_ecosystem);
-        registry.total_rewards_distributed
+    public fun get_total_quests(): u64 acquires GameRegistry {
+        let registry = borrow_global<GameRegistry>(@npc_ecosystem);
+        registry.total_quests
     }
 }

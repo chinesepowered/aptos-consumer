@@ -39,4 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# aptos move contracts
+/contracts/build/
+/contracts/.aptos/
+
+# claude
 /.claude

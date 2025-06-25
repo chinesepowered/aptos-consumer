@@ -1,0 +1,14 @@
+Transaction submitted: https://explorer.aptoslabs.com/txn/0x03e9e7e1a16a77d2a746eabebdff7ad2335633cd2755058a73c6a0931a01ec42?network=testnet
+{
+  "Result": {
+    "transaction_hash": "0x03e9e7e1a16a77d2a746eabebdff7ad2335633cd2755058a73c6a0931a01ec42",
+    "gas_used": 3875,
+    "gas_unit_price": 100,
+    "sender": "4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c",
+    "sequence_number": 0,
+    "success": true,
+    "timestamp_us": 1750812152196451,
+    "version": 6793475483,
+    "vm_status": "Executed successfully"
+  }
+}
