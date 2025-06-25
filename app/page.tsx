@@ -8,7 +8,7 @@ import { WalletButton } from '@/components/wallet-button';
 import { StoryFragments } from '@/components/story-fragments';
 
 export default function Home() {
-  const { connected, balance } = useWallet();
+  const { connected, balance, account } = useWallet();
   const [activeTab, setActiveTab] = useState<'world' | 'profile' | 'fragments'>('world');
 
   return (
@@ -109,7 +109,7 @@ export default function Home() {
               </div>
               <p className="text-xs text-slate-600 max-w-2xl mx-auto">
                 Demo creates a testnet wallet instantly. Get free APT from the{' '}
-                <a href="https://aptos.dev/network/faucet" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline">
+                <a href="https://aptos.dev/en/network/faucet" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline">
                   Aptos faucet
                 </a>{' '}
                 to interact with NPCs and mint story fragments.
@@ -134,7 +134,7 @@ export default function Home() {
                   </p>
                 </div>
                 <a
-                  href="https://aptos.dev/network/faucet"
+                  href={`https://aptos.dev/en/network/faucet?address=${account?.accountAddress.toString()}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-yellow-500/20"

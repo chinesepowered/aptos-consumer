@@ -15,7 +15,7 @@ export function WalletButton() {
             {(balance / 100000000).toFixed(4)} APT
             {needsFunding && (
               <a
-                href="https://aptos.dev/network/faucet"
+                href={`https://aptos.dev/en/network/faucet?address=${account.accountAddress.toString()}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="ml-2 text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-lg hover:bg-yellow-500/30 transition-colors"
