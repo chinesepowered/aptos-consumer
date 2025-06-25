@@ -189,8 +189,9 @@ export function GameWorld() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Generating procedural world...</p>
+          <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-slate-300 text-lg">Generating procedural world...</p>
+          <p className="text-slate-500 text-sm mt-2">AI is crafting your adventure</p>
         </div>
       </div>
     );
@@ -200,44 +201,44 @@ export function GameWorld() {
     <div className="grid lg:grid-cols-3 gap-6 h-full">
       {/* World Info & NPCs */}
       <div className="lg:col-span-1 space-y-4">
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Current World</h3>
+            <h3 className="text-lg font-semibold text-emerald-300">Current World</h3>
             <button
               onClick={regenerateWorld}
-              className="text-xs bg-purple-500/20 hover:bg-purple-500/30 px-3 py-1 rounded-full transition-colors"
+              className="text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded-xl transition-all duration-300 border border-emerald-500/30"
             >
               🔄 New World
             </button>
           </div>
-          <p className="text-sm text-gray-300 mb-4">{currentWorld.description}</p>
+          <p className="text-sm text-slate-300 mb-4">{currentWorld.description}</p>
           
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-purple-400">Quest Hooks:</h4>
+            <h4 className="text-sm font-medium text-cyan-400">Quest Hooks:</h4>
             {currentWorld.questHooks.map((hook: string, index: number) => (
-              <div key={index} className="text-xs text-gray-400 bg-white/5 p-2 rounded">
+              <div key={index} className="text-xs text-slate-400 bg-slate-700/50 p-3 rounded-xl border border-slate-600/50">
                 • {hook}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-          <h3 className="text-lg font-semibold mb-4">NPCs</h3>
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
+          <h3 className="text-lg font-semibold mb-4 text-cyan-300">NPCs</h3>
           <div className="space-y-3">
             {currentWorld.npcs.map((npc: NPCCharacter) => (
               <button
                 key={npc.id}
                 onClick={() => selectNPC(npc)}
-                className={`w-full text-left p-3 rounded-lg transition-all ${
+                className={`w-full text-left p-4 rounded-xl transition-all duration-300 ${
                   selectedNPC?.id === npc.id
-                    ? 'bg-purple-500/20 border border-purple-500/30'
-                    : 'bg-white/5 hover:bg-white/10 border border-white/10'
+                    ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/50 shadow-lg shadow-emerald-500/10'
+                    : 'bg-slate-700/30 hover:bg-slate-700/50 border border-slate-600/50'
                 }`}
               >
-                <div className="font-medium">{npc.name}</div>
-                <div className="text-xs text-gray-400 mt-1">{npc.personality}</div>
-                <div className="text-xs text-gray-500 mt-1 italic">{npc.currentContext}</div>
+                <div className="font-medium text-white">{npc.name}</div>
+                <div className="text-xs text-slate-400 mt-1">{npc.personality}</div>
+                <div className="text-xs text-slate-500 mt-1 italic">{npc.currentContext}</div>
               </button>
             ))}
           </div>
@@ -246,14 +247,14 @@ export function GameWorld() {
 
       {/* Chat Interface */}
       <div className="lg:col-span-2">
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 h-full flex flex-col">
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 h-full flex flex-col">
           {/* Chat Header */}
-          <div className="p-4 border-b border-white/10">
-            <h3 className="font-semibold">
+          <div className="p-6 border-b border-slate-700/50">
+            <h3 className="font-semibold text-white">
               {selectedNPC ? `Conversation with ${selectedNPC.name}` : 'Select an NPC to start'}
             </h3>
             {selectedNPC && (
-              <p className="text-sm text-gray-400 mt-1">{selectedNPC.personality}</p>
+              <p className="text-sm text-slate-400 mt-1">{selectedNPC.personality}</p>
             )}
           </div>
 
@@ -266,12 +267,12 @@ export function GameWorld() {
                   className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-sm p-3 rounded-lg ${
+                    className={`max-w-sm p-4 rounded-xl ${
                       message.type === 'user'
-                        ? 'bg-purple-500/20 text-white'
+                        ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-white border border-emerald-500/30'
                         : message.type === 'npc'
-                        ? 'bg-blue-500/20 text-white'
-                        : 'bg-gray-500/20 text-gray-300'
+                        ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white border border-blue-500/30'
+                        : 'bg-slate-700/50 text-slate-300 border border-slate-600/50'
                     }`}
                   >
                     {message.type === 'npc' && (
@@ -286,10 +287,10 @@ export function GameWorld() {
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-blue-500/20 p-3 rounded-lg">
+                  <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 p-4 rounded-xl border border-blue-500/30">
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-blue-400/30 border-t-blue-400 rounded-full animate-spin"></div>
-                      <span className="text-sm text-gray-400">NPC is thinking...</span>
+                      <span className="text-sm text-slate-300">NPC is thinking...</span>
                     </div>
                   </div>
                 </div>
@@ -299,21 +300,21 @@ export function GameWorld() {
 
           {/* Input */}
           {selectedNPC && (
-            <div className="p-4 border-t border-white/10">
-              <div className="flex space-x-3">
+            <div className="p-6 border-t border-slate-700/50">
+              <div className="flex space-x-4">
                 <input
                   type="text"
                   value={playerMessage}
                   onChange={(e) => setPlayerMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
                   placeholder={`Say something to ${selectedNPC.name}...`}
-                  className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500/50"
+                  className="flex-1 bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                   disabled={isLoading}
                 />
                 <button
                   onClick={sendMessage}
                   disabled={isLoading || !playerMessage.trim()}
-                  className="bg-purple-500 hover:bg-purple-600 disabled:opacity-50 px-6 py-2 rounded-lg font-medium transition-colors"
+                  className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 disabled:opacity-50 px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-emerald-500/20"
                 >
                   Send
                 </button>

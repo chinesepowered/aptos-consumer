@@ -25,8 +25,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const connect = async () => {
     setConnecting(true);
     try {
-      // For demo purposes, create a new account and fund it
-      const newAccount = await aptosService.createDemoAccount();
+      // Create a new account (without automatic funding)
+      const newAccount = await aptosService.createDemoAccountWithoutFunding();
       setAccount(newAccount);
       setConnected(true);
       

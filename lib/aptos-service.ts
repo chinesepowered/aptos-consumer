@@ -264,15 +264,24 @@ class AptosService {
     }
   }
 
-  // Demo Helper: Create a demo account with some APT
+  // Demo Helper: Create a demo account without funding (SDK no longer supports auto-funding)
+  async createDemoAccountWithoutFunding(): Promise<Account> {
+    const account = Account.generate();
+    return account;
+  }
+
+  // Demo Helper: Create a demo account with some APT (deprecated - use faucet manually)
   async createDemoAccount(): Promise<Account> {
     const account = Account.generate();
     
     if (this.network === Network.TESTNET) {
-      await this.fundAccount(account.accountAddress.toString(), 200000000); // 2 APT
-      
-      // Wait a bit for funding to complete
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      try {
+        await this.fundAccount(account.accountAddress.toString(), 200000000); // 2 APT
+        // Wait a bit for funding to complete
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        console.warn('Auto-funding failed, use manual faucet:', error);
+      }
     }
 
     return account;
