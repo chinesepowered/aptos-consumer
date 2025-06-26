@@ -58,21 +58,24 @@ An AI-powered GameFi platform built on Aptos blockchain where NPCs create dynami
 
 ## 🎮 How to Demo
 
-The app is designed for easy demonstration:
+The app is designed for easy demonstration with a seamless user experience:
 
-1. **Landing Page**: Showcases the concept with beautiful UI
-2. **One-Click Wallet**: Creates a demo wallet with testnet APT automatically
-3. **Immediate Gameplay**: Start interacting with NPCs right away
-4. **Visual Feedback**: All actions show immediate results in the UI
+1. **Landing Page**: Showcases the concept with modern glass morphism UI
+2. **One-Click Wallet**: Creates a demo wallet that persists across sessions
+3. **Testnet Funding**: Get APT from faucet with pre-filled addresses  
+4. **Immediate Gameplay**: Start interacting with NPCs right away
+5. **Visual Feedback**: All actions show immediate results with smooth animations
 
 ### Demo Flow:
-1. Visit the homepage
-2. Click "Connect Wallet" (creates demo wallet automatically)
-3. Navigate to "Game World" tab
-4. Generate a procedural world
-5. Select an NPC and start chatting
-6. Watch as story fragments and quests are generated
-7. Check "Profile" and "Story Fragments" tabs to see progress
+1. Visit the homepage and explore the feature showcase
+2. Click "Connect Wallet" (creates persistent demo wallet)
+3. Fund wallet using testnet faucet (link provided with pre-filled address)
+4. Click "Initialize Profile" in the Profile tab to set up on-chain data
+5. Navigate to "Game World" tab and generate a procedural world
+6. Select an NPC and start an intelligent conversation
+7. Watch as AI generates story fragments and quests in real-time
+8. Check "Profile" and "Story Fragments" tabs to see blockchain-verified progress
+9. Complete quests and level up your character
 
 ## 🏗️ Architecture
 
@@ -83,27 +86,32 @@ The app is designed for easy demonstration:
 - **State Management**: Zustand for global state
 
 ### Smart Contracts (Move)
-- **story_fragments.move**: NFT collection for story fragments
-- **npc_rewards.move**: Player progression and quest system
+- **npc_ecosystem.move**: Unified contract handling story fragments, player profiles, and quest system
+- **GameRegistry**: Global state management for tracking all game entities
+- **Event Emission**: On-chain tracking of all player actions and achievements
 
-### AI Services
-- **Together AI**: Primary LLM provider (Llama 3.2 90B)
-- **Groq**: Alternative provider (Llama 3.3 70B)
-- **Dynamic Prompting**: Context-aware NPC responses
+### AI Services  
+- **Together AI**: Primary LLM provider (Llama 3.3 70B Instruct Turbo Free)
+- **Groq**: Alternative provider (Llama 4 Maverick 17B 128k Instruct)
+- **Dual Provider Support**: Seamless fallback between AI providers
+- **Context-Aware Prompting**: NPCs remember conversation history and player context
 
 ## 🔧 Technical Details
 
 ### Smart Contract Functions
 
-**Story Fragments:**
-- `mint_story_fragment()`: Create new story NFTs
-- `interact_with_fragment()`: Like/favorite fragments
-- `get_fragment_details()`: View fragment metadata
+**Core Functions:**
+- `initialize_game_registry()`: One-time setup for global game state
+- `initialize_player_profile()`: Create player account with progression tracking
+- `mint_story_fragment()`: Create unique story NFTs from AI interactions
+- `create_quest()`: Generate AI-powered quests with dynamic rewards
+- `complete_quest()`: Claim rewards, gain XP, and level up
+- `interact_with_fragment()`: Social interactions with story NFTs
 
-**Player Progression:**
-- `initialize_player_profile()`: Create player account
-- `create_quest()`: Generate new quests
-- `complete_quest()`: Claim rewards and XP
+**View Functions:**
+- `get_player_profile()`: Retrieve player stats, level, and achievements  
+- `get_fragment_details()`: View story NFT metadata and interaction count
+- `get_total_quests()`: Check available quest count
 
 ### AI Integration
 
@@ -136,22 +144,24 @@ aptos move publish --named-addresses npc_ecosystem=<your_mainnet_address>
 
 Update `NEXT_PUBLIC_MODULE_ADDRESS` in environment variables.
 
-## 🎯 Hackathon Highlights
+## 🎯 Key Highlights
 
-**Why This Wins:**
+**What Makes This Special:**
 
-1. **Innovation**: First truly intelligent NPC ecosystem with AI-generated content
-2. **Technical Excellence**: Clean Move contracts + modern React frontend
-3. **Demo Ready**: Works immediately without complex setup
-4. **User Experience**: Beautiful, intuitive interface
-5. **Aptos Integration**: Meaningful use of Aptos features (NFTs, coin transfers, events)
-6. **Scalability**: Modular architecture ready for production
+1. **Innovation**: First truly intelligent NPC ecosystem with AI-generated content on blockchain
+2. **Technical Excellence**: Clean Move contracts + modern React frontend with TypeScript
+3. **Demo Ready**: Works immediately without complex setup or wallet installation
+4. **User Experience**: Beautiful glass morphism UI with smooth animations
+5. **Aptos Integration**: Meaningful use of Aptos features (token objects, view functions, events)
+6. **AI Integration**: Dual LLM providers with context-aware dialogue generation
+7. **Scalability**: Modular architecture ready for production deployment
 
 **Aptos-Specific Features:**
-- Move smart contracts for story fragments and rewards
-- Aptos Coin integration for quest rewards
-- Event emission for on-chain activity tracking
-- Object-based NFT standard implementation
+- Move smart contracts with unified resource management
+- Aptos token object standard for story fragment NFTs
+- Event emission for comprehensive on-chain activity tracking
+- View functions for efficient blockchain data queries
+- Testnet integration with faucet support for seamless onboarding
 
 ## 🛠️ Development
 
@@ -176,4 +186,7 @@ MIT License - see LICENSE file for details.
 
 ---
 
-Built with ❤️ for the Aptos hackathon using Next.js, Move, Together AI, and Groq.
+**Live Demo:** [Deployed on Vercel](https://your-deployment-url.vercel.app)  
+**Contract:** [View on Aptos Explorer](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c?network=testnet)
+
+Built with ❤️ using Next.js 15, Move smart contracts, Together AI, and Groq on Aptos blockchain.
