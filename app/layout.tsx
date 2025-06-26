@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Intelligent NPC Ecosystem",
+  title: "Quest AI",
   description: "AI-powered GameFi platform with dynamic NPCs and procedural storytelling",
 };
 

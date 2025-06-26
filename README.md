@@ -1,4 +1,4 @@
-# Intelligent NPC Ecosystem
+# Quest AI
 
 An AI-powered GameFi platform built on Aptos blockchain where NPCs create dynamic storylines, generate quests in real-time, and evolve based on player interactions. Players can mint unique story fragments as NFTs and experience procedural game worlds powered by advanced language models.
 
@@ -189,4 +189,4 @@ MIT License - see LICENSE file for details.
 **Live Demo:** [Deployed on Vercel](https://your-deployment-url.vercel.app)  
 **Contract:** [View on Aptos Explorer](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c?network=testnet)
 
-Built with ❤️ using Next.js 15, Move smart contracts, Together AI, and Groq on Aptos blockchain.
+**Quest AI** - Built with ❤️ using Next.js 15, Move smart contracts, Together AI, and Groq on Aptos blockchain.

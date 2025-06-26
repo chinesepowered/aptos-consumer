@@ -22,7 +22,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                NPC Ecosystem
+                Quest AI
               </h1>
               <p className="text-sm text-slate-400">AI-Powered GameFi Platform</p>
             </div>
