@@ -72,6 +72,13 @@ class AptosService {
 
   async getStoryFragmentDetails(fragmentAddress: string): Promise<StoryFragment | null> {
     try {
+      // Try to get from localStorage first (for demo fragments)
+      const localFragment = localStorage.getItem(`fragment-${fragmentAddress}`);
+      if (localFragment) {
+        return JSON.parse(localFragment);
+      }
+
+      // Fallback to contract call
       const response = await this.aptos.view({
         payload: {
           function: `${this.moduleAddress}::npc_ecosystem::get_fragment_details`,
@@ -100,14 +107,41 @@ class AptosService {
 
   async getAllStoryFragments(): Promise<string[]> {
     try {
-      // Since our contract doesn't have a function to get all fragment addresses,
-      // we'll return an empty array for now. In a real implementation, you'd 
-      // either add this to the contract or use events to track fragments.
-      console.log('Note: getAllStoryFragments not implemented in deployed contract');
+      // For demo purposes, we'll track fragments in localStorage
+      // In production, you'd use events or a registry contract
+      const storedFragments = localStorage.getItem('player-story-fragments');
+      if (storedFragments) {
+        return JSON.parse(storedFragments);
+      }
       return [];
     } catch (error) {
-      console.error('Error fetching all story fragments:', error);
+      console.error('Error fetching story fragments:', error);
       return [];
+    }
+  }
+
+  // Helper to track minted fragments locally for demo
+  async trackMintedFragment(account: Account, fragmentData: any): Promise<void> {
+    try {
+      const fragmentAddress = account.accountAddress.toString();
+      const storedFragments = localStorage.getItem('player-story-fragments');
+      const fragments = storedFragments ? JSON.parse(storedFragments) : [];
+      
+      // Add this fragment address to the list
+      if (!fragments.includes(fragmentAddress)) {
+        fragments.push(fragmentAddress);
+        localStorage.setItem('player-story-fragments', JSON.stringify(fragments));
+      }
+
+      // Store the fragment details
+      localStorage.setItem(`fragment-${fragmentAddress}`, JSON.stringify({
+        ...fragmentData,
+        address: fragmentAddress,
+        timestamp: Date.now() / 1000,
+        author: fragmentAddress
+      }));
+    } catch (error) {
+      console.error('Error tracking fragment:', error);
     }
   }
 

@@ -25,7 +25,25 @@ export function GameWorld() {
   // Load initial world
   useEffect(() => {
     if (account) {
-      loadWorld();
+      // Try to restore world from localStorage first
+      const savedWorld = localStorage.getItem('current-game-world');
+      if (savedWorld) {
+        try {
+          const world = JSON.parse(savedWorld);
+          setCurrentWorld(world);
+          setMessages([{
+            id: 'welcome',
+            type: 'system',
+            content: `Welcome back to the ${world.description}`,
+            timestamp: new Date()
+          }]);
+        } catch (error) {
+          console.error('Failed to restore world:', error);
+          loadWorld();
+        }
+      } else {
+        loadWorld();
+      }
       loadPlayerLevel();
     }
   }, [account]);
@@ -49,6 +67,9 @@ export function GameWorld() {
 
       const world = await apiResponse.json();
       setCurrentWorld(world);
+      
+      // Save world to localStorage
+      localStorage.setItem('current-game-world', JSON.stringify(world));
       
       // Add welcome message
       setMessages([{
@@ -178,6 +199,17 @@ export function GameWorld() {
             response.storyFragment.rarity
           );
 
+          // Track the fragment locally for demo purposes
+          await aptosService.trackMintedFragment(account, {
+            id: Date.now(),
+            title: response.storyFragment.title,
+            content: response.storyFragment.content,
+            npcCharacter: selectedNPC.name,
+            questContext: `Conversation with ${selectedNPC.name}`,
+            rarity: response.storyFragment.rarity,
+            interactionCount: 0
+          });
+
           setMessages(prev => [...prev, {
             id: (Date.now() + 3).toString(),
             type: 'system',
@@ -217,6 +249,8 @@ export function GameWorld() {
   };
 
   const regenerateWorld = () => {
+    // Clear saved world
+    localStorage.removeItem('current-game-world');
     setCurrentWorld(null);
     setSelectedNPC(null);
     setMessages([]);

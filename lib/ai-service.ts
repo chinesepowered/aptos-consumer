@@ -103,69 +103,106 @@ Only include questGenerated if a quest should be created. Only include storyFrag
   }
 
   private async callAIProvider(prompt: string): Promise<string> {
-    if (this.provider === 'together') {
-      return this.callTogetherAI(prompt);
-    } else {
-      return this.callGroqAI(prompt);
+    // Try primary provider first
+    try {
+      if (this.provider === 'together') {
+        return await this.callTogetherAI(prompt);
+      } else {
+        return await this.callGroqAI(prompt);
+      }
+    } catch (error: any) {
+      if (error.message === 'RATE_LIMITED') {
+        console.log('Primary provider rate limited, trying fallback...');
+        // Try the other provider as fallback
+        try {
+          if (this.provider === 'together') {
+            return await this.callGroqAI(prompt);
+          } else {
+            return await this.callTogetherAI(prompt);
+          }
+        } catch (fallbackError) {
+          console.log('Fallback provider also failed');
+          throw fallbackError;
+        }
+      }
+      throw error;
     }
   }
 
   private async callTogetherAI(prompt: string): Promise<string> {
-    const response = await axios.post(
-      'https://api.together.xyz/v1/chat/completions',
-      {
-        model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert at roleplaying as game NPCs and generating engaging content. Always respond with valid JSON.'
+    try {
+      const response = await axios.post(
+        'https://api.together.xyz/v1/chat/completions',
+        {
+          model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert at roleplaying as game NPCs and generating engaging content. Always respond with valid JSON. Ensure all strings are properly quoted and escaped.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 1000,
+          temperature: 0.8,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json'
           },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.8,
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          timeout: 15000 // 15 second timeout
         }
-      }
-    );
+      );
 
-    return response.data.choices[0].message.content;
+      return response.data.choices[0].message.content;
+    } catch (error: any) {
+      if (error.response?.status === 429) {
+        console.log('Together AI rate limited, falling back to Groq');
+        throw new Error('RATE_LIMITED');
+      }
+      throw error;
+    }
   }
 
   private async callGroqAI(prompt: string): Promise<string> {
-    const response = await axios.post(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        model: 'meta-llama/llama-4-maverick-17b-128e-instruct',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert at roleplaying as game NPCs and generating engaging content. Always respond with valid JSON.'
+    try {
+      const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: 'meta-llama/llama-4-maverick-17b-128e-instruct',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert at roleplaying as game NPCs and generating engaging content. Always respond with valid JSON. Ensure all strings are properly quoted and escaped.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 1000,
+          temperature: 0.8,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.groqApiKey}`,
+            'Content-Type': 'application/json'
           },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.8,
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          timeout: 15000 // 15 second timeout
         }
-      }
-    );
+      );
 
-    return response.data.choices[0].message.content;
+      return response.data.choices[0].message.content;
+    } catch (error: any) {
+      if (error.response?.status === 429) {
+        console.log('Groq rate limited');
+        throw new Error('RATE_LIMITED');
+      }
+      throw error;
+    }
   }
 
   private parseAIResponse(response: string, character: NPCCharacter): AIResponse {
@@ -231,12 +268,36 @@ Respond in this JSON format:
 
     try {
       const response = await this.callAIProvider(prompt);
-      const cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      return JSON.parse(cleanResponse);
+      let cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      // Additional cleaning for common JSON issues
+      cleanResponse = this.sanitizeJsonResponse(cleanResponse);
+      
+      const parsed = JSON.parse(cleanResponse);
+      
+      // Validate the required structure
+      if (!parsed.description || !parsed.npcs || !parsed.questHooks) {
+        throw new Error('Invalid response structure');
+      }
+      
+      return parsed;
     } catch (error) {
       console.error('Failed to generate procedural world:', error);
       return this.getFallbackWorld(theme);
     }
+  }
+
+  private sanitizeJsonResponse(response: string): string {
+    // Remove any text before the first { and after the last }
+    const firstBrace = response.indexOf('{');
+    const lastBrace = response.lastIndexOf('}');
+    
+    if (firstBrace === -1 || lastBrace === -1) {
+      throw new Error('No valid JSON structure found');
+    }
+    
+    const cleaned = response.substring(firstBrace, lastBrace + 1);
+    return cleaned;
   }
 
   private getFallbackWorld(theme: string): {
@@ -244,29 +305,57 @@ Respond in this JSON format:
     npcs: NPCCharacter[];
     questHooks: string[];
   } {
-    return {
-      description: `A mystical ${theme} realm where ancient magic meets cutting-edge technology. Floating islands drift through ethereal mists, connected by bridges of pure energy.`,
-      npcs: [
-        {
-          id: 'elder_sage',
-          name: 'Elder Zephyr',
-          personality: 'Wise and mysterious, speaks in riddles',
-          background: 'An ancient guardian of this realm who has witnessed countless travelers',
-          currentContext: 'Meditating by the central energy nexus, sensing disturbances in the realm'
-        },
-        {
-          id: 'young_inventor',
-          name: 'Kaia the Tinkerer',
-          personality: 'Enthusiastic and innovative, always building something new',
-          background: 'A young genius who combines magic with technology',
-          currentContext: 'Working on a new device that could revolutionize travel between realms'
-        }
-      ],
-      questHooks: [
-        'The energy nexus is showing strange fluctuations that could destabilize the realm',
-        'Ancient artifacts have been discovered that could unlock new powers'
-      ]
-    };
+    // Provide a few different fallback worlds for variety
+    const fallbackWorlds = [
+      {
+        description: `A mystical ${theme} realm where ancient magic meets cutting-edge technology. Floating islands drift through ethereal mists, connected by bridges of pure energy.`,
+        npcs: [
+          {
+            id: 'elder_sage',
+            name: 'Elder Zephyr',
+            personality: 'Wise and mysterious, speaks in riddles',
+            background: 'An ancient guardian of this realm who has witnessed countless travelers',
+            currentContext: 'Meditating by the central energy nexus, sensing disturbances in the realm'
+          },
+          {
+            id: 'young_inventor',
+            name: 'Kaia the Tinkerer',
+            personality: 'Enthusiastic and innovative, always building something new',
+            background: 'A young genius who combines magic with technology',
+            currentContext: 'Working on a new device that could revolutionize travel between realms'
+          }
+        ],
+        questHooks: [
+          'The energy nexus is showing strange fluctuations that could destabilize the realm',
+          'Ancient artifacts have been discovered that could unlock new powers'
+        ]
+      },
+      {
+        description: `A vibrant ${theme} marketplace where traders from across dimensions gather to exchange exotic goods and share tales of distant worlds.`,
+        npcs: [
+          {
+            id: 'merchant_captain',
+            name: 'Captain Thorne',
+            personality: 'Charismatic and well-traveled, full of stories',
+            background: 'A legendary trader who has visited realms beyond imagination',
+            currentContext: 'Organizing a caravan for a dangerous but profitable expedition'
+          },
+          {
+            id: 'mystical_oracle',
+            name: 'Seer Lyralei',
+            personality: 'Enigmatic and prophetic, speaks of futures untold',
+            background: 'A fortune teller whose visions have saved countless lives',
+            currentContext: 'Reading the cosmic signs and sensing great change approaching'
+          }
+        ],
+        questHooks: [
+          'A valuable shipment has gone missing on the interdimensional trade routes',
+          'Strange omens suggest a legendary treasure will soon be revealed'
+        ]
+      }
+    ];
+
+    return fallbackWorlds[Math.floor(Math.random() * fallbackWorlds.length)];
   }
 }
 
