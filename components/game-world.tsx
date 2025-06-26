@@ -22,21 +22,51 @@ export function GameWorld() {
   const [isLoading, setIsLoading] = useState(false);
   const [playerLevel, setPlayerLevel] = useState(1);
 
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('game-chat-messages', JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  // Save selected NPC to localStorage
+  useEffect(() => {
+    if (selectedNPC) {
+      localStorage.setItem('selected-npc', JSON.stringify(selectedNPC));
+    }
+  }, [selectedNPC]);
+
   // Load initial world
   useEffect(() => {
     if (account) {
       // Try to restore world from localStorage first
       const savedWorld = localStorage.getItem('current-game-world');
+      const savedMessages = localStorage.getItem('game-chat-messages');
+      const savedNPC = localStorage.getItem('selected-npc');
+      
       if (savedWorld) {
         try {
           const world = JSON.parse(savedWorld);
           setCurrentWorld(world);
-          setMessages([{
-            id: 'welcome',
-            type: 'system',
-            content: `Welcome back to the ${world.description}`,
-            timestamp: new Date()
-          }]);
+          
+          // Restore chat messages if they exist
+          if (savedMessages) {
+            const messages = JSON.parse(savedMessages);
+            setMessages(messages);
+          } else {
+            setMessages([{
+              id: 'welcome',
+              type: 'system',
+              content: `Welcome back to the ${world.description}`,
+              timestamp: new Date()
+            }]);
+          }
+          
+          // Restore selected NPC if it exists
+          if (savedNPC) {
+            const npc = JSON.parse(savedNPC);
+            setSelectedNPC(npc);
+          }
         } catch (error) {
           console.error('Failed to restore world:', error);
           loadWorld();
@@ -112,12 +142,23 @@ export function GameWorld() {
 
   const selectNPC = (npc: NPCCharacter) => {
     setSelectedNPC(npc);
-    setMessages(prev => [...prev, {
-      id: Date.now().toString(),
-      type: 'system',
-      content: `You approach ${npc.name}. ${npc.background}`,
-      timestamp: new Date()
-    }]);
+    
+    // Only add the approach message if this is a new NPC selection
+    // (not a restoration from localStorage)
+    const currentMessages = messages;
+    const hasRecentApproachMessage = currentMessages.some(msg => 
+      msg.content.includes(`You approach ${npc.name}`) && 
+      Date.now() - new Date(msg.timestamp).getTime() < 60000 // Within last minute
+    );
+    
+    if (!hasRecentApproachMessage) {
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        type: 'system',
+        content: `You approach ${npc.name}. ${npc.background}`,
+        timestamp: new Date()
+      }]);
+    }
   };
 
   const sendMessage = async () => {
@@ -249,8 +290,10 @@ export function GameWorld() {
   };
 
   const regenerateWorld = () => {
-    // Clear saved world
+    // Clear all saved game state
     localStorage.removeItem('current-game-world');
+    localStorage.removeItem('game-chat-messages');
+    localStorage.removeItem('selected-npc');
     setCurrentWorld(null);
     setSelectedNPC(null);
     setMessages([]);
