@@ -17,6 +17,16 @@ export function PlayerStats() {
     }
   }, [account]);
 
+  if (!account) {
+    return (
+      <div className="text-center max-w-md mx-auto">
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10">
+          <p className="text-gray-400">Please connect your wallet to view player stats.</p>
+        </div>
+      </div>
+    );
+  }
+
   const loadPlayerData = async () => {
     if (!account) return;
 
@@ -160,7 +170,7 @@ export function PlayerStats() {
               <div className="text-xs text-gray-400">NPC Interactions</div>
             </div>
             <div className="bg-white/10 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold text-yellow-400">{(balance / 100000000).toFixed(2)}</div>
+              <div className="text-2xl font-bold text-yellow-400">{(balance / 100000000).toFixed(8)}</div>
               <div className="text-xs text-gray-400">APT Balance</div>
             </div>
           </div>
@@ -294,7 +304,7 @@ export function PlayerStats() {
               <div className="text-sm text-gray-400">One-time setup for game registry</div>
             </button>
             <a
-              href={`${aptosService.getNetworkInfo().explorerUrl}/account/${account.accountAddress.toString()}`}
+              href={`https://explorer.aptoslabs.com/account/${account.accountAddress.toString()}?network=testnet`}
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 p-3 rounded-lg transition-colors"

@@ -341,9 +341,11 @@ class AptosService {
   }
 
   // Demo Helper: Create a demo account without funding (SDK no longer supports auto-funding)
-  async createDemoAccountWithoutFunding(): Promise<Account> {
-    const account = Account.generate();
-    return account;
+  async createDemoAccountWithoutFunding(): Promise<{ account: Account; privateKey: Ed25519PrivateKey; }> {
+    // Generate a new random private key
+    const privateKey = new Ed25519PrivateKey(new Uint8Array(32).map(() => Math.floor(Math.random() * 256)));
+    const account = Account.fromPrivateKey({ privateKey });
+    return { account, privateKey };
   }
 
   // Demo Helper: Create a demo account with some APT (deprecated - use faucet manually)

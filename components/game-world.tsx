@@ -17,7 +17,19 @@ export function GameWorld() {
   const { account } = useWallet();
   const [currentWorld, setCurrentWorld] = useState<any>(null);
   const [selectedNPC, setSelectedNPC] = useState<NPCCharacter | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedMessages = localStorage.getItem('game-chat-messages');
+      if (savedMessages) {
+        const parsedMessages = JSON.parse(savedMessages);
+        return parsedMessages.map((msg: Message) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+      }
+    }
+    return [];
+  });
   const [playerMessage, setPlayerMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [playerLevel, setPlayerLevel] = useState(1);
@@ -52,7 +64,10 @@ export function GameWorld() {
           // Restore chat messages if they exist
           if (savedMessages) {
             const messages = JSON.parse(savedMessages);
-            setMessages(messages);
+            setMessages(messages.map((msg: Message) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            })));
           } else {
             setMessages([{
               id: 'welcome',

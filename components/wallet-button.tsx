@@ -3,30 +3,29 @@
 import { useWallet } from './wallet-provider';
 
 export function WalletButton() {
-  const { connected, connecting, connect, disconnect, account, balance } = useWallet();
+  const { connected, connecting, connect, disconnect, account, balance, network } = useWallet();
 
   if (connected && account) {
-    const needsFunding = balance === 0;
-    
     return (
       <div className="flex items-center space-x-4">
         <div className="text-right">
-          <div className={`text-sm font-semibold ${needsFunding ? 'text-yellow-400' : 'text-emerald-300'}`}>
-            {(balance / 100000000).toFixed(4)} APT
-            {needsFunding && (
-              <a
-                href={`https://aptos.dev/en/network/faucet?address=${account.accountAddress.toString()}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-2 text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-lg hover:bg-yellow-500/30 transition-colors"
-              >
-                Get APT
-              </a>
-            )}
+          <div className="text-sm font-semibold text-emerald-300">
+            {(balance / 100000000).toFixed(8)} APT
+            <a
+              href={`https://aptos.dev/en/network/faucet?address=${account.accountAddress.toString()}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-lg hover:bg-yellow-500/30 transition-colors"
+            >
+              Get APT
+            </a>
           </div>
           <div className="text-xs text-slate-400 font-mono">
             {account.accountAddress.toString().slice(0, 6)}...
             {account.accountAddress.toString().slice(-4)}
+            <span className="ml-2 px-2 py-1 bg-slate-700 rounded-md text-slate-300 capitalize text-[10px]">
+              {network}
+            </span>
           </div>
         </div>
         <button

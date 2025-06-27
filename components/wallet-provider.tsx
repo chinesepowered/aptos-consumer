@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Account, Ed25519PrivateKey } from '@aptos-labs/ts-sdk';
+import { Account, Ed25519PrivateKey, Network } from '@aptos-labs/ts-sdk';
 import { aptosService } from '@/lib/aptos-service';
 
 interface WalletContextType {
@@ -9,6 +9,8 @@ interface WalletContextType {
   connected: boolean;
   connecting: boolean;
   balance: number;
+  loadingBalance: boolean;
+  network: Network | null;
   connect: () => Promise<void>;
   disconnect: () => void;
   refreshBalance: () => Promise<void>;
@@ -21,18 +23,24 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [balance, setBalance] = useState(0);
+  const [loadingBalance, setLoadingBalance] = useState(false);
+  const [network, setNetwork] = useState<Network | null>(null);
+
+  useEffect(() => {
+    setNetwork(aptosService.getNetworkInfo().network);
+  }, []);
 
   const connect = async () => {
     setConnecting(true);
     try {
       // Create a new account (without automatic funding)
-      const newAccount = await aptosService.createDemoAccountWithoutFunding();
+      const { account: newAccount, privateKey } = await aptosService.createDemoAccountWithoutFunding();
       setAccount(newAccount);
       setConnected(true);
       
       // Store account in localStorage for demo persistence
       localStorage.setItem('demo-account', JSON.stringify({
-        privateKeyHex: newAccount.privateKey.toString(),
+        privateKeyHex: privateKey.toString(),
         address: newAccount.accountAddress.toString()
       }));
       
@@ -48,16 +56,21 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setAccount(null);
     setConnected(false);
     setBalance(0);
+    setLoadingBalance(false);
     localStorage.removeItem('demo-account');
   };
 
   const refreshBalance = async () => {
     if (account) {
+      setLoadingBalance(true);
       try {
         const accountBalance = await aptosService.getAccountBalance(account.accountAddress.toString());
         setBalance(accountBalance);
       } catch (error) {
         console.error('Failed to refresh balance:', error);
+        setBalance(0);
+      } finally {
+        setLoadingBalance(false);
       }
     }
   };
@@ -80,11 +93,24 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Periodically refresh balance
+  useEffect(() => {
+    if (connected && account) {
+      const interval = setInterval(() => {
+        refreshBalance();
+      }, 15000); // Refresh every 15 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [connected, account]);
+
   const value: WalletContextType = {
     account,
     connected,
     connecting,
     balance,
+    loadingBalance,
+    network,
     connect,
     disconnect,
     refreshBalance,
