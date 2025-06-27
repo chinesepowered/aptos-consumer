@@ -1,6 +1,31 @@
 # Quest AI
 
+![Quest AI Cover](public/cover.jpg)
+
 An AI-powered GameFi platform built on Aptos blockchain where NPCs create dynamic storylines, generate quests in real-time, and evolve based on player interactions. Players can mint unique story fragments as NFTs and experience procedural game worlds powered by advanced language models.
+
+## 🎥 Demo Video
+
+[![Quest AI Demo](https://img.youtube.com/vi/P54zcg19UxE/maxresdefault.jpg)](https://www.youtube.com/watch?v=P54zcg19UxE)
+
+*Click the image above to watch our comprehensive demo showcasing AI-powered NPCs, dynamic quest generation, and blockchain integration.*
+
+## 📸 Screenshots
+
+<div align="center">
+  
+### Game Interface
+<img src="public/scr1.jpg" alt="Game Interface" width="80%" style="border-radius: 10px; margin: 10px 0;"/>
+
+### NPC Interactions & Story Fragments
+<img src="public/scr2.jpg" alt="NPC Interactions" width="80%" style="border-radius: 10px; margin: 10px 0;"/>
+
+### Player Profile & Progression
+<img src="public/scr3.jpg" alt="Player Profile" width="80%" style="border-radius: 10px; margin: 10px 0;"/>
+
+</div>
+
+---
 
 ## 🌟 Features
 
@@ -205,7 +230,6 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**🚀 Live Demo:** [Deployed on Vercel](https://your-deployment-url.vercel.app)  
 **⛓️ Smart Contract:** [View on Aptos Testnet Explorer](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c?network=testnet)  
 **📊 Live Transactions:** [Monitor Activity](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c/transactions?network=testnet)
 
