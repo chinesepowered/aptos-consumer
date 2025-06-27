@@ -14,13 +14,13 @@ An AI-powered GameFi platform built on Aptos blockchain where NPCs create dynami
 
 <div align="center">
   
-### Game Interface
-<img src="public/scr1.jpg" alt="Game Interface" width="80%" style="border-radius: 10px; margin: 10px 0;"/>
+### Gamer Profile
+<img src="public/scr1.jpg" alt="Gamer Profile" width="80%" style="border-radius: 10px; margin: 10px 0;"/>
 
-### NPC Interactions & Story Fragments
+### NPC Interactions & Custom Story
 <img src="public/scr2.jpg" alt="NPC Interactions" width="80%" style="border-radius: 10px; margin: 10px 0;"/>
 
-### Player Profile & Progression
+### Player Progression and Artifacts on Chain
 <img src="public/scr3.jpg" alt="Player Profile" width="80%" style="border-radius: 10px; margin: 10px 0;"/>
 
 </div>
