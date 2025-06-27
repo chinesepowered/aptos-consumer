@@ -42,7 +42,19 @@ An AI-powered GameFi platform built on Aptos blockchain where NPCs create dynami
    NEXT_PUBLIC_APTOS_NETWORK=testnet
    ```
 
-3. **Deploy Smart Contracts (Optional):**
+3. **Smart Contracts (Already Deployed):**
+   The Move contracts are already deployed on Aptos testnet:
+   ```
+   Contract Address: 0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c
+   Network: Aptos Testnet
+   ```
+   
+   **🔍 View Live Contract:**
+   - [Contract on Aptos Explorer](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c?network=testnet)
+   - [Recent Transactions](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c/transactions?network=testnet)
+   - [Deployed Modules](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c/modules?network=testnet)
+
+   *Optional - Deploy your own contract:*
    ```bash
    cd contracts
    aptos init --network testnet
@@ -157,11 +169,18 @@ Update `NEXT_PUBLIC_MODULE_ADDRESS` in environment variables.
 7. **Scalability**: Modular architecture ready for production deployment
 
 **Aptos-Specific Features:**
-- Move smart contracts with unified resource management
-- Aptos token object standard for story fragment NFTs
-- Event emission for comprehensive on-chain activity tracking
-- View functions for efficient blockchain data queries
-- Testnet integration with faucet support for seamless onboarding
+- **Move Smart Contracts**: Unified `npc_ecosystem` module with 300+ lines of Move code
+- **Token Objects**: Story fragment NFTs using latest Aptos token standard
+- **View Functions**: Efficient on-chain data queries (`get_player_profile`, `get_fragment_details`)
+- **Event Emission**: Comprehensive tracking (`StoryFragmentMinted`, `QuestCompleted`, `PlayerLevelUp`)
+- **Resource Management**: Structured data with `PlayerProfile`, `StoryFragment`, `Quest`, `GameRegistry`
+- **Testnet Integration**: Full deployment on Aptos testnet with faucet support
+
+**🔗 Live Contract Verification:**
+All game actions are verifiable on Aptos blockchain:
+- [View Contract Code](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c/modules/code/npc_ecosystem?network=testnet)
+- [Monitor Transactions](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c/transactions?network=testnet)
+- [Track Events](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c/events?network=testnet)
 
 ## 🛠️ Development
 
@@ -186,7 +205,8 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Live Demo:** [Deployed on Vercel](https://your-deployment-url.vercel.app)  
-**Contract:** [View on Aptos Explorer](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c?network=testnet)
+**🚀 Live Demo:** [Deployed on Vercel](https://your-deployment-url.vercel.app)  
+**⛓️ Smart Contract:** [View on Aptos Testnet Explorer](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c?network=testnet)  
+**📊 Live Transactions:** [Monitor Activity](https://explorer.aptoslabs.com/account/0x4ec2db86ea4e41e2763366eb0a577e3a3c12aa84779905d59759ce584e8cc37c/transactions?network=testnet)
 
 **Quest AI** - Built with ❤️ using Next.js 15, Move smart contracts, Together AI, and Groq on Aptos blockchain.
